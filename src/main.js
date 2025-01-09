@@ -2,7 +2,7 @@ window.WAF_API_KEY = import.meta.env.VITE_WAF_API_KEY;
 
 document.querySelector('#app').innerHTML = `
   <div>
-       <div id="my-captcha-container"></div>
+    <div id="my-captcha-container"></div>
 
     <div style="display: flex; justify-content: center; margin-top: 4rem">
         <!-- Formulaire d'entrée -->
