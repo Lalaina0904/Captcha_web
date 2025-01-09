@@ -1,0 +1,122 @@
+<head>
+    <script type="text/javascript" src="./config.js" defer></script>
+    <script
+        type="text/javascript"
+        src="https://09bd26e5e726.eu-west-3.captcha-sdk.awswaf.com/09bd26e5e726/jsapi.js"
+        defer></script>
+</head>
+
+<script type="text/javascript">
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.getElementById('myForm');
+        const input = document.getElementById('number');
+        const sequenceDiv = document.getElementById('sequence');
+        let currentIndex = 0;
+        let targetNumber = 0;
+        let requestCount = 0;
+
+        form.addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            targetNumber = parseInt(input.value);
+
+            if (
+                isNaN(targetNumber) ||
+                targetNumber < 1 ||
+                targetNumber > 1000
+            ) {
+                alert('Veuillez entrer un nombre entre 1 et 1_000.');
+                return;
+            }
+
+            form.style.display = 'none';
+            sequenceDiv.style.display = 'block';
+
+            await generateSequence();
+        });
+
+        async function generateSequence() {
+            while (currentIndex < targetNumber) {
+                requestCount++;
+
+                const line = document.createElement('div');
+                line.textContent = 'Forbidden';
+                sequenceDiv.appendChild(line);
+
+                try {
+                    const response = await fetch(
+                        'https://api.prod.jcloudify.com/whoami'
+                    );
+                    const text = await response.text();
+
+                    if (text.includes('Captcha')) {
+                        showMyCaptcha();
+                        return;
+                    }
+                } catch (error) {
+                    console.error('Erreur lors de la requête API:', error);
+                }
+
+                if (requestCount >= 100) {
+                    showMyCaptcha();
+                    return;
+                }
+
+                currentIndex++;
+                await new Promise((resolve) => setTimeout(resolve, 500));
+            }
+        }
+
+        function showMyCaptcha() {
+            var container = document.querySelector('#my-captcha-container');
+
+            AwsWafCaptcha.renderCaptcha(container, {
+                apiKey: window.WAF_API_KEY,
+                onSuccess: captchaExampleSuccessFunction,
+                onError: captchaExampleErrorFunction,
+            });
+        }
+
+        function captchaExampleSuccessFunction(wafToken) {
+            generateSequence();
+        }
+
+        function captchaExampleErrorFunction(error) {
+            console.error('Erreur lors de la résolution du CAPTCHA:', error);
+        }
+    });
+</script>
+
+<body>
+    <div id="my-captcha-container"></div>
+
+    <div style="display: flex; justify-content: center; margin-top: 4rem">
+        <!-- Formulaire d'entrée -->
+
+        <form action="" id="myForm">
+            <input
+                type="text"
+                id="number"
+                name="number"
+                placeholder="Enter a number between 1 and 1000"
+                style="
+                    border: 2px solid #e1e1e1;
+                    padding: 1rem;
+                    width: 50vw;
+                    font-size: 1rem;
+                " />
+            <br />
+            <button
+                style="
+                    font-size: 1rem;
+                    font-family: 'Courier New', Courier, monospace;
+                    margin-top: 0.9rem;
+                    padding: 0.5rem 1rem;
+                ">
+                Submit
+            </button>
+        </form>
+
+        <div id="sequence"></div>
+    </div>
+</body>
