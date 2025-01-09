@@ -24,4 +24,4 @@ dist-ssr
 *.sw?
 
 # // add .env
-.env
+/.env
