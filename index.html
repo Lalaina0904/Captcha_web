@@ -35,35 +35,63 @@
             await generateSequence();
         });
 
+        // async function generateSequence() {
+        //     while (currentIndex < targetNumber) {
+        //         requestCount++;
+
+        //         const line = document.createElement('div');
+        //         line.textContent = 'Forbidden';
+        //         sequenceDiv.appendChild(line);
+
+        //         try {
+        //             const response = await fetch(
+        //                 'https://api.prod.jcloudify.com/whoami'
+        //             );
+        //             const text = await response.text();
+
+        //             if (text.includes('Captcha')) {
+        //                 showMyCaptcha();
+        //                 return;
+        //             }
+        //         } catch (error) {
+        //             console.error('Erreur lors de la requête API:', error);
+        //         }
+
+        //         if (requestCount >= 100) {
+        //             showMyCaptcha();
+        //             return;
+        //         }
+
+        //         currentIndex++;
+        //         await new Promise((resolve) => setTimeout(resolve, 500));
+        //     }
+        // }
+
         async function generateSequence() {
             while (currentIndex < targetNumber) {
-                requestCount++;
-
-                const line = document.createElement('div');
-                line.textContent = 'Forbidden';
-                sequenceDiv.appendChild(line);
-
                 try {
                     const response = await fetch(
                         'https://api.prod.jcloudify.com/whoami'
                     );
                     const text = await response.text();
 
+                    // Vérification du CAPTCHA
                     if (text.includes('Captcha')) {
                         showMyCaptcha();
                         return;
                     }
+
+                    // Ajout de la ligne dans le DOM
+                    const line = document.createElement('div');
+                    line.textContent = `Request ${currentIndex + 1}: Forbidden`;
+                    sequenceDiv.appendChild(line);
+                    currentIndex++;
                 } catch (error) {
                     console.error('Erreur lors de la requête API:', error);
                 }
 
-                if (requestCount >= 100) {
-                    showMyCaptcha();
-                    return;
-                }
-
-                currentIndex++;
-                await new Promise((resolve) => setTimeout(resolve, 500));
+                // Pause de 1 seconde
+                await new Promise((resolve) => setTimeout(resolve, 1000));
             }
         }
 
